@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using SmartAnalyzers.CSharpExtensions.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace JustDo.Features.Todos {
     public static class Details {
@@ -78,5 +79,22 @@ namespace JustDo.Features.Todos {
                 RuleFor(x => x.Id).NotEmpty();
             }
         }
+
+        public class ModelExample : IExamplesProvider<Guid> {
+
+            public Guid GetExamples() => Guid.NewGuid();
+        }
+
+        public class ResponseExample : IExamplesProvider<TodoEnvelope> {
+            public TodoEnvelope GetExamples() => new TodoEnvelope { 
+                Todo = new Todo {
+                    Done = true,
+                    DueDateUtc = DateTime.Parse("2020-11-12T00:00:00"),
+                    Id = Guid.NewGuid(),
+                    Name = "MyTodo1",
+                    Priority = TodoPriority.HIGH
+                }
+            };
+            }
     }
 }

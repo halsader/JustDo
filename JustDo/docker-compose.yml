@@ -8,9 +8,12 @@ services:
     image: postgres:10
 
   justdo.api:
-    image: ${REGISTRY:justdo}:justdo-api-${PLATFORM:-linux}-${TAG:-latest}
+    image: ${REGISTRY:-justdo}:justdo-api-${PLATFORM:-linux}-${TAG:-latest}
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings:JustDoDb: Host=sql.justdo.data; Username=justdo; Password=justdo; Database=justdo; SSL Mode=Prefer; Trust Server Certificate=true 
+    build:
+      context: .
+      dockerfile: JustDo/Dockerfile
     expose:
       - 80

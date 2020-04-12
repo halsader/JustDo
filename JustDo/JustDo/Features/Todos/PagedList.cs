@@ -18,6 +18,8 @@ using Microsoft.Extensions.Logging;
 
 using SmartAnalyzers.CSharpExtensions.Annotations;
 
+using Swashbuckle.AspNetCore.Filters;
+
 namespace JustDo.Features.Todos {
     public static class PagedList {
         public class Handler : IRequestHandler<Query, TodoPagedListEnvelope> {
@@ -115,6 +117,99 @@ namespace JustDo.Features.Todos {
                 RuleForEach(x => x.TodoOrder).Must(x => !string.IsNullOrEmpty(x.Field)).When(x => x.TodoOrder?.Length > 0);
                 RuleForEach(x => x.TodoOrder).Must(x => x.Direction.HasValue).When(x => x.TodoOrder?.Length > 0);
             }
+        }
+
+        public class ModelExample : IExamplesProvider<Query> {
+
+            public Query GetExamples() => new Query {
+                Filters = new TodoFilterCollection {
+                    Done = TodoDoneOptions.ALL,
+                    DueDate = new DateRangeFilter {
+                        From = DateTime.Parse("1980-12-11T00:00:00Z"),
+                        To = DateTime.Parse("2020-12-01T00:00:00Z"),
+                    },
+                    Name = "todo"
+                },
+                GroupOrder = new Order {
+                    Direction = Order.DirectionEnum.Asc,
+                    Field = "dueDateUtc"
+                },
+                TodoOrder = new Order[] {
+                    new Order {
+                        Direction = Order.DirectionEnum.Asc,
+                        Field = "name"
+                    },
+                    new Order {
+                        Direction = Order.DirectionEnum.Desc,
+                        Field = "done"
+                    }
+                },
+                ItemsPerPage = 100,
+                Page = 1
+            };
+        }
+
+        public class ResponseExample : IExamplesProvider<TodoPagedListEnvelope> {
+
+            public TodoPagedListEnvelope GetExamples() => new TodoPagedListEnvelope {
+                TodoPaged = new Paged<System.Collections.Generic.SortedDictionary<DateTime, System.Collections.Generic.IReadOnlyCollection<Todo>>> {
+                    Items = new System.Collections.Generic.SortedDictionary<DateTime, System.Collections.Generic.IReadOnlyCollection<Todo>> {
+                    { DateTime.Parse("2020-11-12T00:00:00"),
+                      new Todo[] {
+                        new Todo {
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-11-12T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo1",
+                            Priority = TodoPriority.HIGH
+                        },
+                        new Todo {
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-11-12T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo2",
+                            Priority = TodoPriority.MEDIUM
+                        },
+                        new Todo {
+                            Done = false,
+                            DueDateUtc = DateTime.Parse("2020-11-12T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo3",
+                            Priority = TodoPriority.NOT_SET
+                        },
+                      }
+                    },
+                    { DateTime.Parse("2020-08-15T00:00:00"),
+                      new Todo[] {
+                        new Todo {
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-08-15T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo4",
+                            Priority = TodoPriority.HIGH
+                        },
+                        new Todo {
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-08-15T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo5",
+                            Priority = TodoPriority.MEDIUM
+                        },
+                        new Todo {
+                            Done = false,
+                            DueDateUtc = DateTime.Parse("2020-08-15T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo6",
+                            Priority = TodoPriority.NOT_SET
+                        },
+                      }
+                    }
+                    },
+                    ItemsPerPage = 2,
+                    PageNum = 1,
+                    TotalItems = 500
+                }
+            };
         }
     }
 }

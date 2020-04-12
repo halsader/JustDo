@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Runtime.Serialization;
@@ -17,6 +18,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using SmartAnalyzers.CSharpExtensions.Annotations;
+
+using Swashbuckle.AspNetCore.Filters;
 
 namespace JustDo.Features.Todos {
     public static class List {
@@ -97,6 +100,92 @@ namespace JustDo.Features.Todos {
                 RuleForEach(x => x.TodoOrder).Must(x => !string.IsNullOrEmpty(x.Field)).When(x => x.TodoOrder?.Length > 0);
                 RuleForEach(x => x.TodoOrder).Must(x => x.Direction.HasValue).When(x => x.TodoOrder?.Length > 0);
             }
+        }
+
+        public class ModelExample : IExamplesProvider<Query> {
+
+            public Query GetExamples() => new Query {
+                Filters = new TodoFilterCollection {
+                    Done = TodoDoneOptions.ALL,
+                    DueDate = new DateRangeFilter {
+                        From = DateTime.Parse("1980-12-11T00:00:00Z"),
+                        To = DateTime.Parse("2020-12-01T00:00:00Z"),
+                    },
+                    Name = "todo"
+                },
+                GroupOrder = new Order {
+                    Direction = Order.DirectionEnum.Asc,
+                    Field = "dueDateUtc"
+                },
+                TodoOrder = new Order[] {
+                    new Order {
+                        Direction = Order.DirectionEnum.Asc,
+                        Field = "name"
+                    },
+                    new Order {
+                        Direction = Order.DirectionEnum.Desc,
+                        Field = "done"
+                    }
+                }
+            };
+        }
+
+        public class ResponseExample : IExamplesProvider<TodoListEnvelope> {
+
+            public TodoListEnvelope GetExamples() => new TodoListEnvelope {
+                TodoList = new SortedDictionary<DateTime, IReadOnlyCollection<Todo>> {
+                    { DateTime.Parse("2020-11-12T00:00:00"), 
+                      new Todo[] { 
+                        new Todo { 
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-11-12T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo1",
+                            Priority = TodoPriority.HIGH
+                        },
+                        new Todo {
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-11-12T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo2",
+                            Priority = TodoPriority.MEDIUM
+                        },
+                        new Todo {
+                            Done = false,
+                            DueDateUtc = DateTime.Parse("2020-11-12T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo3",
+                            Priority = TodoPriority.NOT_SET
+                        },
+                      }
+                    },
+                    { DateTime.Parse("2020-08-15T00:00:00"),
+                      new Todo[] {
+                        new Todo {
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-08-15T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo4",
+                            Priority = TodoPriority.HIGH
+                        },
+                        new Todo {
+                            Done = true,
+                            DueDateUtc = DateTime.Parse("2020-08-15T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo5",
+                            Priority = TodoPriority.MEDIUM
+                        },
+                        new Todo {
+                            Done = false,
+                            DueDateUtc = DateTime.Parse("2020-08-15T00:00:00"),
+                            Id = Guid.NewGuid(),
+                            Name = "MyTodo6",
+                            Priority = TodoPriority.NOT_SET
+                        },
+                      }
+                    }
+                }
+            };
         }
     }
 }

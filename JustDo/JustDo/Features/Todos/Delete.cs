@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using SmartAnalyzers.CSharpExtensions.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace JustDo.Features.Todos {
     public static class Delete {
@@ -70,6 +71,11 @@ namespace JustDo.Features.Todos {
             public CommandValidator() {
                 RuleFor(x => x.Id).NotEmpty();
             }
+        }
+
+        public class ModelExample : IExamplesProvider<Guid> {
+
+            public Guid GetExamples() => Guid.NewGuid();
         }
     }
 }

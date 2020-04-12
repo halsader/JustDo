@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using SmartAnalyzers.CSharpExtensions.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace JustDo.Features.Todos {
     public static class Create {
@@ -75,6 +76,15 @@ namespace JustDo.Features.Todos {
                 RuleFor(x => x.Name).NotEmpty();
                 RuleFor(x => x.DueDate).LessThan(DateTime.MaxValue).GreaterThan(DateTime.MinValue).Must(x=>x.Kind == DateTimeKind.Utc);
             }
+        }
+
+        public class ModelExample : IExamplesProvider<Command> {
+
+            public Command GetExamples() => new Command {
+                DueDate = DateTime.Parse("2020-08-11T15:48:13Z"),
+                Name = "MyToDo",
+                Priority = TodoPriority.MEDIUM
+            };
         }
     }
 }

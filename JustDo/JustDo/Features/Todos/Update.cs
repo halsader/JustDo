@@ -7,13 +7,14 @@ using FluentValidation;
 
 using JustDo.Infrastructure.Db.Entity;
 using JustDo.Infrastructure.Errors;
-
+using JustDo.Models;
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
+using Newtonsoft.Json;
 using SmartAnalyzers.CSharpExtensions.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace JustDo.Features.Todos {
     public static class Update {
@@ -56,6 +57,10 @@ namespace JustDo.Features.Todos {
                         existingTodo.Done = c.Done.Value;
                     }
 
+                    if (c.Priority.HasValue && c.Priority.Value != existingTodo.Priority) {
+                        existingTodo.Priority = c.Priority.Value;
+                    }
+
                     if (c.DueDate.HasValue) {
                         var dueDate = c.DueDate.Value;
 
@@ -77,11 +82,7 @@ namespace JustDo.Features.Todos {
 
         [InitOnly]
         [DataContract]
-        public class Command : IRequest {
-
-            [DataMember(Name = "id")]
-            public Guid Id { get; set; }
-
+        public class CommandData {
             [DataMember(Name = "name")]
             public string Name { get; set; }
 
@@ -90,6 +91,18 @@ namespace JustDo.Features.Todos {
 
             [DataMember(Name = "done")]
             public bool? Done { get; set; }
+
+            [DataMember(Name = "priority")]
+            public TodoPriority? Priority { get; set; }
+
+        }
+
+        [InitOnly]
+        [DataContract]
+        public class Command : CommandData, IRequest {
+
+            [JsonIgnore]
+            public Guid Id { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command> {
@@ -98,6 +111,16 @@ namespace JustDo.Features.Todos {
                 RuleFor(x => x.Id).NotEmpty();
                 RuleFor(x => x.DueDate).Must(x=>x.Value.Kind == DateTimeKind.Utc).When(x=>x.DueDate.HasValue);
             }
+        }
+
+        public class ModelExample : IExamplesProvider<CommandData> {
+
+            public CommandData GetExamples() => new CommandData {
+                DueDate = DateTime.Parse("2020-08-11T15:48:13Z"),
+                Name = "MyToDo",
+                Priority = TodoPriority.MEDIUM,
+                Done = true
+            };
         }
     }
 }
