@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  sql.justdo.data:
+    environment:
+      POSTGRES_PASSWORD: justdo
+      POSTGRES_USER: justdo
+    image: postgres:10
+
+  justdo.api:
+    image: ${REGISTRY:justdo}:justdo-api-${PLATFORM:-linux}-${TAG:-latest}
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings:JustDoDb: Host=sql.justdo.data; Username=justdo; Password=justdo; Database=justdo; SSL Mode=Prefer; Trust Server Certificate=true 
+    expose:
+      - 80
