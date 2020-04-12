@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace JustDo.Features {
+namespace JustDo.Features.Todos {
     public class ToDoController {
     }
 }
